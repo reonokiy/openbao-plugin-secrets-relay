@@ -31,7 +31,8 @@ They exercise SDK logical requests, not a live OpenBao server.
 Run `make local-up` to start a disposable Docker instance at
 `http://127.0.0.1:18200`. Relay is registered and mounted at `relay/`.
 `make local-check` verifies plugin RPC and entity authentication; run
-`make local-password` yourself to set the local UI login. No GitHub adapter
+`make local-password` yourself to set the local UI login, then `make local-login`
+to open the UI with Username/Password already selected. No GitHub adapter
 is enabled. See [local setup](docs/local-openbao.md) for access and cleanup.
 
 ## Layout

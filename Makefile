@@ -1,4 +1,4 @@
-.PHONY: build test check fmt local-up local-status local-check local-password local-down
+.PHONY: build test check fmt local-up local-status local-check local-password local-login local-down
 
 build:
 	mkdir -p dist
@@ -28,6 +28,9 @@ local-check:
 
 local-password:
 	python3 dev/local_openbao.py password
+
+local-login:
+	python3 dev/local_openbao.py login
 
 local-down:
 	python3 dev/local_openbao.py stop

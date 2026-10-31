@@ -19,9 +19,11 @@ import tempfile
 import time
 import urllib.error
 import urllib.request
+import webbrowser
 
 ROOT = Path(__file__).resolve().parents[1]
 ADDRESS = "http://127.0.0.1:18200"
+LOGIN_URL = ADDRESS + "/ui/vault/auth?with=userpass"
 IMAGE = "quay.io/openbao/openbao:2.7.1@sha256:6d2b93856e3fcf7b18ad855a0b51eaba474dc8b79cf554379ea32034797d2acf"
 CONTAINER = "relay-openbao-local"
 LABEL = "net.openbao-relay.local"
@@ -367,16 +369,38 @@ def start():
     raise LocalError("Local startup did not complete within 55 seconds")
 
 
+def login(open_browser=True):
+    control("status")
+    opened = False
+    if open_browser:
+        try:
+            opened = bool(webbrowser.open(LOGIN_URL, new=2))
+        except (OSError, webbrowser.Error):
+            pass
+    return {
+        "login_url": LOGIN_URL,
+        "username": "developer",
+        "auth_method": "userpass",
+        "browser_open_requested": opened,
+        "next_step": "Enter developer and your local password; first run make local-password if needed.",
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["up", "status", "check", "password", "stop", "_serve"])
+    parser.add_argument("action", choices=["up", "status", "check", "password", "login", "stop", "_serve"])
+    parser.add_argument("--no-open", action="store_true", help="Print the login link without opening a browser")
     args = parser.parse_args()
+    if args.no_open and args.action != "login":
+        parser.error("--no-open is only supported with login")
     try:
         if args.action == "_serve":
             serve()
             return
         if args.action == "up":
             response = start()
+        elif args.action == "login":
+            response = login(open_browser=not args.no_open)
         elif args.action == "password":
             if not sys.stdin.isatty():
                 raise LocalError("Set the local password interactively in your own terminal")
@@ -392,6 +416,8 @@ def main():
                     if time.monotonic() >= deadline:
                         raise LocalError("Local container shutdown did not finish within 15 seconds")
                     time.sleep(0.1)
+        if args.action in ("up", "password"):
+            response["login_url"] = LOGIN_URL
         print(json.dumps(response, indent=2))
     except LocalError as error:
         print(str(error), file=sys.stderr)

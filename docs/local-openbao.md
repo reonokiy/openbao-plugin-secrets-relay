@@ -38,8 +38,26 @@ Enter a local-only password of at least 16 characters twice. The helper sends
 it to the local supervisor through a private Unix socket without echoing it,
 putting it in command arguments, or writing it to a file.
 
-In the UI, choose the Username/Password method (mount `userpass`) and username
-`developer`. Your policy allows Relay configuration, roles, and issuance paths,
+Then open the preselected login page:
+
+```sh
+make local-login
+```
+
+This checks that the local supervisor is available and asks your default browser
+to open `http://127.0.0.1:18200/ui/vault/auth?with=userpass`. The native OpenBao
+UI selects Username/Password and uses the default `userpass` mount, so no method
+or path selection is needed. Enter username `developer` and your local password.
+OpenBao 2.7.1 does not support prefilling the username through this route's query
+parameters. The command does not authenticate or pass credentials to the browser.
+
+On a machine without a graphical browser, get the same link with
+`python3 dev/local_openbao.py login --no-open`. The helper always prints the link
+if the browser opener reports failure. `local-up` and `local-password` also
+include it in their output. Opening the link does not create the local account;
+run `make local-password` first.
+
+Your policy allows Relay configuration, roles, and issuance paths,
 plus read-only mount metadata. It does not grant plugin-catalog administration
 or access to the supervisor's bootstrap token.
 
