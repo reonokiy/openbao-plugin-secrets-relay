@@ -10,10 +10,33 @@ Requires Docker, Python 3 with its standard library, and the project's pinned
 Go toolchain:
 
 ```sh
-make local-up
+make local-init
 make local-status
 make local-check
 ```
+
+`local-init` builds the plugin and runs the complete initialization workflow:
+
+1. Start the pinned Docker image with loopback-only access.
+2. Initialize and unseal OpenBao through its API.
+3. Register the plugin checksum and version, then mount it at `relay/`.
+4. Enable userpass and install the limited local policy.
+5. Generate a disposable test user and random password in supervisor memory,
+   authenticate through the API, and verify entity identity, plugin RPC and ACLs.
+6. Revoke the temporary login token and remove the test user.
+
+No browser, username/password entry, or token configuration is required.
+The command returns only initialization metadata and boolean checks. It does
+not retain a client session or export credentials. Run `make local-login` to
+repeat the programmatic authentication and checks against the running instance.
+
+Repeating `local-init` reuses the owned supervisor and reruns verification;
+it does not reset OpenBao, replace an optional `developer` password, or claim
+an unrelated container. If initialization or verification fails, the command
+exits nonzero without returning a successful initialization report. An instance
+that already started remains available for inspection with `local-status`
+and cleanup with `local-down`. The existing `local-up` command remains available
+for starting the instance separately.
 
 OpenBao listens at `http://127.0.0.1:18200`; the UI is at
 `http://127.0.0.1:18200/ui/`. Docker publishes only the loopback address.
@@ -26,7 +49,10 @@ and version, mounts it at `relay/`, enables `userpass`, and installs a limited
 local policy. The production provider registry is empty; attempts to configure
 `provider=github` are expected to be rejected.
 
-## Set your local login
+## Optional manual access
+
+This section is only for inspecting the UI or using the native `bao` CLI
+yourself. It is not needed for automated initialization or verification.
 
 Run this yourself in an interactive terminal:
 
@@ -38,24 +64,10 @@ Enter a local-only password of at least 16 characters twice. The helper sends
 it to the local supervisor through a private Unix socket without echoing it,
 putting it in command arguments, or writing it to a file.
 
-Then open the preselected login page:
-
-```sh
-make local-login
-```
-
-This checks that the local supervisor is available and asks your default browser
-to open `http://127.0.0.1:18200/ui/vault/auth?with=userpass`. The native OpenBao
-UI selects Username/Password and uses the default `userpass` mount, so no method
-or path selection is needed. Enter username `developer` and your local password.
-OpenBao 2.7.1 does not support prefilling the username through this route's query
-parameters. The command does not authenticate or pass credentials to the browser.
-
-On a machine without a graphical browser, get the same link with
-`python3 dev/local_openbao.py login --no-open`. The helper always prints the link
-if the browser opener reports failure. `local-up` and `local-password` also
-include it in their output. Opening the link does not create the local account;
-run `make local-password` first.
+If using the UI, open
+`http://127.0.0.1:18200/ui/vault/auth?with=userpass` yourself and enter username
+`developer` and your local password. The helper's `login` command now performs
+API verification; browser launching and the former `--no-open` option were removed.
 
 Your policy allows Relay configuration, roles, and issuance paths,
 plus read-only mount metadata. It does not grant plugin-catalog administration

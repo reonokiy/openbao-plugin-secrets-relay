@@ -1,4 +1,4 @@
-.PHONY: build test check fmt local-up local-status local-check local-password local-login local-down
+.PHONY: build test check fmt local-init local-up local-status local-check local-password local-login local-down
 
 build:
 	mkdir -p dist
@@ -16,6 +16,9 @@ check:
 
 fmt:
 	gofmt -w $$(git ls-files -- '*.go')
+
+local-init: build
+	python3 dev/local_openbao.py init
 
 local-up: build
 	python3 dev/local_openbao.py up

@@ -15,36 +15,54 @@ spec.loader.exec_module(local)
 
 
 class LocalOpenBaoTests(unittest.TestCase):
-    def test_login_selects_userpass_without_authenticating(self):
-        with patch.object(local, "control", return_value={}) as control:
-            with patch.object(local.webbrowser, "open", return_value=True) as open_browser:
-                response = local.login()
-        control.assert_called_once_with("status")
-        open_browser.assert_called_once_with(
-            local.ADDRESS + "/ui/vault/auth?with=userpass", new=2
-        )
-        self.assertTrue(response["browser_open_requested"])
-        self.assertEqual(response["username"], "developer")
+    def test_login_uses_supervisor_check_without_retaining_a_session(self):
+        checks = {"entity_authentication": True, "plugin_rpc": True}
+        with patch.object(local, "control", return_value={"checks": checks}) as control:
+            response = local.login()
+        control.assert_called_once_with("check")
+        self.assertEqual(response, {
+            "address": local.ADDRESS, "auth_method": "userpass",
+            "session_retained": False, "checks": checks,
+        })
 
-    def test_login_no_open_and_browser_failure_keep_link_available(self):
-        for mode in ("no-open", "unavailable", "error"):
-            with self.subTest(mode=mode):
-                with patch.object(local, "control", return_value={}):
-                    with patch.object(
-                        local.webbrowser, "open", return_value=False,
-                        side_effect=local.webbrowser.Error() if mode == "error" else None,
-                    ) as open_browser:
-                        response = local.login(open_browser=mode != "no-open")
-                self.assertEqual(open_browser.call_count, 0 if mode == "no-open" else 1)
-                self.assertFalse(response["browser_open_requested"])
-                self.assertEqual(response["login_url"], local.LOGIN_URL)
-
-    def test_login_checks_server_before_opening_browser(self):
+    def test_login_unavailable_does_not_report_success(self):
         with patch.object(local, "control", side_effect=local.LocalError("Not running")):
-            with patch.object(local.webbrowser, "open") as open_browser:
-                with self.assertRaises(local.LocalError):
-                    local.login()
-        self.assertEqual(open_browser.call_count, 0)
+            with self.assertRaises(local.LocalError):
+                local.login()
+
+    def test_initialize_starts_then_authenticates_and_uses_fresh_checks(self):
+        steps = []
+
+        def start():
+            steps.append("start")
+            return {"address": local.ADDRESS, "container": local.CONTAINER, "checks": {}}
+
+        def request(action):
+            steps.append(action)
+            return {"checks": {"entity_authentication": True}}
+
+        with patch.object(local, "start", side_effect=start):
+            with patch.object(local, "control", side_effect=request):
+                response = local.initialize()
+        self.assertEqual(steps, ["start", "check"])
+        self.assertEqual(response["checks"], {"entity_authentication": True})
+        self.assertTrue(response["initialized"])
+        self.assertFalse(response["authentication"]["session_retained"])
+
+    def test_initialize_failure_does_not_return_partial_success(self):
+        for stage in ("start", "check"):
+            with self.subTest(stage=stage):
+                with patch.object(
+                    local, "start",
+                    return_value={"address": local.ADDRESS, "container": local.CONTAINER},
+                    side_effect=local.LocalError("Startup failed") if stage == "start" else None,
+                ):
+                    with patch.object(
+                        local, "control", side_effect=local.LocalError("Check failed")
+                    ) as control:
+                        with self.assertRaises(local.LocalError):
+                            local.initialize()
+                self.assertEqual(control.call_count, 0 if stage == "start" else 1)
 
     def test_api_errors_do_not_reflect_upstream_body(self):
         disposable = secrets.token_urlsafe(32)
