@@ -9,6 +9,13 @@ The executable builds and speaks the OpenBao plugin protocol. The test suite
 exercises the lifecycle with an adapter compiled into tests only. There is no
 GitHub PAT generator, OAuth onboarding, or functional GitHub UAT issuance yet.
 
+The [GitHub UAT assessment](docs/github-uat-feasibility.md) confirms that scoped
+creation and single-token revocation are documented, but leaves the adapter on
+hold pending independent-token verification and a supported recovery strategy.
+The first [candidate adapter and human-only verifier](docs/github-uat-adapter.md)
+are implemented under `provider/githubuat`. They are not registered or enabled
+in the plugin and do not change the production guarantees.
+
 ## Development
 
 Requires Go 1.27.1. OpenBao API and SDK are pinned to 2.7.1.
@@ -22,11 +29,27 @@ The binary is written to `dist/openbao-plugin-secrets-relay`. The lifecycle
 tests are offline and never contact a vendor or read operator credentials.
 They exercise SDK logical requests, not a live OpenBao server.
 
+## Local OpenBao
+
+Run `make local-init` to build Relay, start a disposable Docker instance at
+`http://127.0.0.1:18200`, initialize and unseal OpenBao, register and mount Relay
+at `relay/`, and verify API authentication and plugin RPC. No browser, manual
+password setup, or token export is needed. Repeating the command reuses the
+running instance and repeats verification.
+
+`make local-login` repeats the programmatic login and permission checks using
+a disposable test user; it does not open the UI or retain a login session.
+`make local-status` reports health and `make local-down` removes the instance.
+No GitHub adapter is enabled.
+See [local setup](docs/local-openbao.md) for details and optional manual access.
+
 ## Layout
 
 ```text
 cmd/openbao-plugin-secrets-relay/  Plugin process entry point
 provider/                        Vendor adapter contract
+provider/githubuat/              Disabled GitHub UAT candidate and verifier
+cmd/relay-github-verify/          Human-operated, memory-only live acceptance
 backend.go                       Factory, storage models, registry
 paths.go                         Configuration and role API
 issuance.go                      Issuance, revocation, recovery
@@ -72,8 +95,8 @@ an authenticated client directly into the plugin, without local files.
 
 Register the binary in the OpenBao plugin catalog as `relay` with an exact
 SHA-256 checksum before enabling a mount. Artifact distribution, catalog
-registration, live integration testing, and production deployment are not
-included in this initial scaffold.
+registration outside the local helper, and production deployment are not
+included. The local helper verifies catalog/RPC behavior, not vendor issuance.
 
 ## Lifecycle
 

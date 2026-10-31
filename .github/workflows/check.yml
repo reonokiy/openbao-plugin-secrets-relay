@@ -22,4 +22,4 @@ jobs:
           go-version-file: go.mod
           cache: true
       - run: make check
-      - run: make build
+      - run: make build github-verifier
