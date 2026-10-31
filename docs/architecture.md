@@ -118,3 +118,11 @@ See the [2026-10-31 UAT assessment](github-uat-feasibility.md) and its pinned,
 field-only API evidence. Scoped creation exists; this does not establish
 independent issuance or recovery of a lost creation response. The current
 provider contract and empty production registry remain unchanged.
+
+## Local server validation
+
+The optional [Docker environment](local-openbao.md) registers and mounts Relay
+on an actual OpenBao server, then verifies userpass entity authentication,
+plugin RPC, and rejection of the unimplemented GitHub provider. Bootstrap
+credentials stay in the supervisor process memory. The instance is loopback-only
+and ephemeral. This is not vendor, lease-scheduler, or failover acceptance.

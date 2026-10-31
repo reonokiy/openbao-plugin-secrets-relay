@@ -26,6 +26,14 @@ The binary is written to `dist/openbao-plugin-secrets-relay`. The lifecycle
 tests are offline and never contact a vendor or read operator credentials.
 They exercise SDK logical requests, not a live OpenBao server.
 
+## Local OpenBao
+
+Run `make local-up` to start a disposable Docker instance at
+`http://127.0.0.1:18200`. Relay is registered and mounted at `relay/`.
+`make local-check` verifies plugin RPC and entity authentication; run
+`make local-password` yourself to set the local UI login. No GitHub adapter
+is enabled. See [local setup](docs/local-openbao.md) for access and cleanup.
+
 ## Layout
 
 ```text
@@ -76,8 +84,8 @@ an authenticated client directly into the plugin, without local files.
 
 Register the binary in the OpenBao plugin catalog as `relay` with an exact
 SHA-256 checksum before enabling a mount. Artifact distribution, catalog
-registration, live integration testing, and production deployment are not
-included in this initial scaffold.
+registration outside the local helper, and production deployment are not
+included. The local helper verifies catalog/RPC behavior, not vendor issuance.
 
 ## Lifecycle
 
