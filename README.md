@@ -12,6 +12,9 @@ GitHub PAT generator, OAuth onboarding, or functional GitHub UAT issuance yet.
 The [GitHub UAT assessment](docs/github-uat-feasibility.md) confirms that scoped
 creation and single-token revocation are documented, but leaves the adapter on
 hold pending independent-token verification and a supported recovery strategy.
+The first [candidate adapter and human-only verifier](docs/github-uat-adapter.md)
+are implemented under `provider/githubuat`. They are not registered or enabled
+in the plugin and do not change the production guarantees.
 
 ## Development
 
@@ -45,6 +48,8 @@ See [local setup](docs/local-openbao.md) for details and optional manual access.
 ```text
 cmd/openbao-plugin-secrets-relay/  Plugin process entry point
 provider/                        Vendor adapter contract
+provider/githubuat/              Disabled GitHub UAT candidate and verifier
+cmd/relay-github-verify/          Human-operated, memory-only live acceptance
 backend.go                       Factory, storage models, registry
 paths.go                         Configuration and role API
 issuance.go                      Issuance, revocation, recovery

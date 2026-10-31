@@ -13,6 +13,7 @@ import (
 	"github.com/openbao/openbao/sdk/v2/logical"
 
 	"github.com/reonokiy/openbao-plugin-secrets-relay/provider"
+	"github.com/reonokiy/openbao-plugin-secrets-relay/provider/githubuat"
 )
 
 type fakeAdapter struct {
@@ -148,6 +149,22 @@ func TestFactoryHasNoProductionProviders(t *testing.T) {
 	}
 	if keys, ok := resp.Data["keys"].([]string); ok && len(keys) != 0 {
 		t.Fatal("production registry must be empty")
+	}
+}
+
+func TestGitHubCandidateCannotBeEnabledThroughRegistryInjection(t *testing.T) {
+	storage := &logical.InmemStorage{}
+	conf := logical.TestBackendConfig()
+	conf.StorageView = storage
+	value, err := FactoryWithAdapters(map[string]provider.Adapter{"github": githubuat.New()})(context.Background(), conf)
+	if err != nil {
+		t.Fatal("candidate backend setup failed")
+	}
+	defer value.Cleanup(context.Background())
+	b := value.(*backend)
+	requireRejected(t, b, storage, "config", map[string]any{"provider": "github"})
+	if entry, err := storage.Get(context.Background(), "config"); err != nil || entry != nil {
+		t.Fatal("candidate configuration was persisted")
 	}
 }
 

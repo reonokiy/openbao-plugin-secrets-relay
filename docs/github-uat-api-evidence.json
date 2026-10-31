@@ -1,7 +1,7 @@
 {
   "assessed_on": "2026-10-31",
-  "source_commit": "f9ed74230d54847b5ca00a1343e8e349e858b8fb",
-  "source": "https://raw.githubusercontent.com/github/rest-api-description/f9ed74230d54847b5ca00a1343e8e349e858b8fb/descriptions/api.github.com/api.github.com.json",
+  "source_commit": "e85aa3d17265bc8a2dd9c1e5357705ee206e9d71",
+  "source": "https://raw.githubusercontent.com/github/rest-api-description/e85aa3d17265bc8a2dd9c1e5357705ee206e9d71/descriptions/api.github.com/api.github.com.json",
   "scope": "Published schema only; no authenticated behavior tested; no examples or credential values retained.",
   "operations": [
     {
@@ -108,5 +108,7 @@
         "nullable": true
       }
     }
-  ]
+  ],
+  "scoped_creation_documentation": "https://docs.github.com/rest/apps/apps#create-a-scoped-access-token",
+  "rechecked_on": "2026-10-31"
 }

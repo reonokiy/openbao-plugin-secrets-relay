@@ -119,6 +119,13 @@ field-only API evidence. Scoped creation exists; this does not establish
 independent issuance or recovery of a lost creation response. The current
 provider contract and empty production registry remain unchanged.
 
+An experimental [candidate adapter and human-only verifier](github-uat-adapter.md)
+implement the protocol under `provider/githubuat`. The adapter advertises no
+verified capabilities and cannot be configured through the current framework,
+even if injected into a registry. It uses a single entity-bound base grant;
+multi-user OAuth storage and refresh are not implemented. The verifier is a
+separate executable and its offline simulations are not live acceptance.
+
 ## Local server validation
 
 The optional [Docker environment](local-openbao.md) registers and mounts Relay

@@ -11,7 +11,10 @@ Relay is developed independently from cluster deployment repositories.
 - Preserve durable records before external side effects and make cleanup
   idempotent, including ambiguous creation responses.
 - Do not describe remote TTL or revocation guarantees beyond tested capabilities.
-- No real vendor adapters, OAuth flows, or production deployment are implemented
-  in the initial scaffold. Keep documentation honest about this boundary.
+- The GitHub UAT candidate is experimental and absent from the production
+  registry. Its human-only verifier does not establish request-ID recovery,
+  native 15-minute expiry, or production readiness. Keep this boundary explicit.
+- Do not run the GitHub verifier with real credentials or run real OAuth
+  onboarding. Use generated in-memory fixtures for agent-operated tests.
 - Run `make check` and `make build` before committing.
 - Behavior-changing commits include concise `Why` and `How` body sections.

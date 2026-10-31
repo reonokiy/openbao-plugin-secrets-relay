@@ -7,23 +7,27 @@ GitHub publishes scoped-UAT creation and individual-token revocation APIs.
 That establishes an integration path, but does not establish every lifecycle
 guarantee required to enable a Relay adapter. No real credentials, user
 onboarding, or authenticated token issuance were used for this assessment.
+An experimental [adapter and acceptance tool](github-uat-adapter.md) now
+implement the protocol and offline failure checks. They remain disabled.
 
 ## Evidence
 
-The primary API evidence is GitHub's official OpenAPI description, pinned to
-commit `f9ed74230d54847b5ca00a1343e8e349e858b8fb`:
+The API evidence was rechecked against GitHub's current official OpenAPI source
+on 2026-10-31 and pinned to commit `e85aa3d17265bc8a2dd9c1e5357705ee206e9d71`:
 
-- [Pinned OpenAPI source](https://github.com/github/rest-api-description/blob/f9ed74230d54847b5ca00a1343e8e349e858b8fb/descriptions/api.github.com/api.github.com.json).
+- [Pinned OpenAPI source](https://github.com/github/rest-api-description/blob/e85aa3d17265bc8a2dd9c1e5357705ee206e9d71/descriptions/api.github.com/api.github.com.json).
 - [Field-only snapshot](github-uat-api-evidence.json), containing selected
   operation IDs, request field names, response statuses, and expiry schema.
   Examples, tokens, response bodies, and credentials are not included.
 - [Official API reference](https://docs.github.com/en/rest/apps/oauth-applications).
+- [Scoped creation reference](https://docs.github.com/en/rest/apps/apps#create-a-scoped-access-token).
 - [User access token generation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app).
 - [Refresh semantics](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/refreshing-user-access-tokens).
 
-The API reference page inspected during this assessment did not list scoped
-creation, whereas the pinned schema contains `apps/scope-token`. A missing
-rendered section is not evidence that the operation does not exist.
+The initial assessment searched the OAuth applications page for scoped
+creation. The current schema links `apps/scope-token` to the separate Apps
+page. This corrects that documentation-location gap; it does not supply missing
+idempotency, expiry-input, or lookup semantics.
 
 ## Findings
 
@@ -82,6 +86,9 @@ repository. Agents must not obtain the App secret, base UAT, refresh token,
 authorization code, or issued test tokens, and must not run real onboarding.
 All credential handling must remain in the human-operated verifier's memory;
 do not paste values or credential-bearing diagnostics into chat or files.
+Run `make github-verify` yourself for the implemented subset below. See the
+[verifier instructions](github-uat-adapter.md) for required private repositories,
+permissions, and the cleanup boundary.
 
 The acceptance result should contain booleans and sanitized HTTP statuses:
 
@@ -105,7 +112,15 @@ before wiring a GitHub adapter into the production factory.
 
 ## Current implementation boundary
 
-The production adapter registry remains empty. No OAuth flow, GitHub request
-path, or unsupported capability flag was added. Existing offline framework
-tests exercise local lifecycle behavior; they cannot validate GitHub's
-token-issuance semantics.
+The production adapter registry remains empty. The candidate has scoped
+creation, token checking and single-token deletion code, but advertises no
+verified capabilities. Even explicitly injecting it into a test registry cannot
+configure it under the existing framework contract. There is no OAuth flow,
+base-token refresh, request-ID recovery implementation, or native short-TTL claim.
+
+Offline tests and the human-operated live verifier are separate evidence.
+The verifier can test distinct concurrent tokens, repository and permission
+restriction, preservation of the sibling/base, and repeated revocation.
+It has not been run with a real authorization by an agent. Parent refresh,
+parent revocation, and actual child expiry still need separate human testing.
+None of those tests can establish a missing request-ID recovery API.

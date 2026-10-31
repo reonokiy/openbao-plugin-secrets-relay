@@ -1,4 +1,4 @@
-.PHONY: build test check fmt local-init local-up local-status local-check local-password local-login local-down
+.PHONY: build test check fmt local-init local-up local-status local-check local-password local-login local-down github-verifier github-verify
 
 build:
 	mkdir -p dist
@@ -37,3 +37,10 @@ local-login:
 
 local-down:
 	python3 dev/local_openbao.py stop
+
+github-verifier:
+	mkdir -p dist
+	CGO_ENABLED=0 go build -trimpath -o dist/relay-github-verify ./cmd/relay-github-verify
+
+github-verify: github-verifier
+	python3 dev/github_verify.py
