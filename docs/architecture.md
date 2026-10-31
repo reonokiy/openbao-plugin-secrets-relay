@@ -111,3 +111,10 @@ credentials. They verify framework state transitions and failures. They do
 not verify the real server's catalog registration, RPC transport, ACL engine,
 lease scheduler, failover, seal-wrapping availability, or any vendor API.
 Those are explicit prerequisites for a production release.
+
+## GitHub assessment
+
+See the [2026-10-31 UAT assessment](github-uat-feasibility.md) and its pinned,
+field-only API evidence. Scoped creation exists; this does not establish
+independent issuance or recovery of a lost creation response. The current
+provider contract and empty production registry remain unchanged.

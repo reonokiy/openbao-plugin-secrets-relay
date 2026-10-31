@@ -9,6 +9,10 @@ The executable builds and speaks the OpenBao plugin protocol. The test suite
 exercises the lifecycle with an adapter compiled into tests only. There is no
 GitHub PAT generator, OAuth onboarding, or functional GitHub UAT issuance yet.
 
+The [GitHub UAT assessment](docs/github-uat-feasibility.md) confirms that scoped
+creation and single-token revocation are documented, but leaves the adapter on
+hold pending independent-token verification and a supported recovery strategy.
+
 ## Development
 
 Requires Go 1.27.1. OpenBao API and SDK are pinned to 2.7.1.

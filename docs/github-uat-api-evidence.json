@@ -1,0 +1,112 @@
+{
+  "assessed_on": "2026-10-31",
+  "source_commit": "f9ed74230d54847b5ca00a1343e8e349e858b8fb",
+  "source": "https://raw.githubusercontent.com/github/rest-api-description/f9ed74230d54847b5ca00a1343e8e349e858b8fb/descriptions/api.github.com/api.github.com.json",
+  "scope": "Published schema only; no authenticated behavior tested; no examples or credential values retained.",
+  "operations": [
+    {
+      "path": "/applications/{client_id}/grant",
+      "method": "delete",
+      "operation_id": "apps/delete-authorization",
+      "request_required": [
+        "access_token"
+      ],
+      "parameter_names": [
+        "client_id"
+      ],
+      "request_fields": [
+        "access_token"
+      ],
+      "response_statuses": [
+        "204",
+        "422"
+      ]
+    },
+    {
+      "path": "/applications/{client_id}/token",
+      "method": "post",
+      "operation_id": "apps/check-token",
+      "request_required": [
+        "access_token"
+      ],
+      "parameter_names": [
+        "client_id"
+      ],
+      "request_fields": [
+        "access_token"
+      ],
+      "response_statuses": [
+        "200",
+        "404",
+        "422"
+      ]
+    },
+    {
+      "path": "/applications/{client_id}/token",
+      "method": "patch",
+      "operation_id": "apps/reset-token",
+      "request_required": [
+        "access_token"
+      ],
+      "parameter_names": [
+        "client_id"
+      ],
+      "request_fields": [
+        "access_token"
+      ],
+      "response_statuses": [
+        "200",
+        "422"
+      ]
+    },
+    {
+      "path": "/applications/{client_id}/token",
+      "method": "delete",
+      "operation_id": "apps/delete-token",
+      "request_required": [
+        "access_token"
+      ],
+      "parameter_names": [
+        "client_id"
+      ],
+      "request_fields": [
+        "access_token"
+      ],
+      "response_statuses": [
+        "204",
+        "422"
+      ]
+    },
+    {
+      "path": "/applications/{client_id}/token/scoped",
+      "method": "post",
+      "operation_id": "apps/scope-token",
+      "request_required": [
+        "access_token"
+      ],
+      "parameter_names": [
+        "client_id"
+      ],
+      "request_fields": [
+        "access_token",
+        "permissions",
+        "repositories",
+        "repository_ids",
+        "target",
+        "target_id"
+      ],
+      "response_statuses": [
+        "200",
+        "401",
+        "403",
+        "404",
+        "422"
+      ],
+      "expires_at_schema": {
+        "type": "string",
+        "format": "date-time",
+        "nullable": true
+      }
+    }
+  ]
+}
